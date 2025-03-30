@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HomeHaven2.0 - Monthly Activity Report</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        .stats-container {
+            display: flex;
+            justify-content: space-between;
+            margin: 20px 0;
+        }
+        .stat-box {
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            padding: 15px;
+            width: 30%;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .stat-box h3 {
+            margin-top: 0;
+            color: #3498db;
+        }
+        .stat-box p {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #3498db;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 0.9em;
+            color: #7f8c8d;
+        }
+    </style>
+</head>
+<body>
+    <h1>Monthly Activity Report</h1>
+    
+    <p>Dear {{email}},</p>
+    <p>Here is your monthly activity report from HomeHaven2.0. Below you'll find a summary of service activities for the past month.</p>
+    
+    <div class="stats-container">
+        <div class="stat-box">
+            <h3>Services Requested</h3>
+            <p>{{request}}</p>
+        </div>
+        <div class="stat-box">
+            <h3>Services Completed</h3>
+            <p>{{close}}</p>
+        </div>
+        <div class="stat-box">
+            <h3>Most Popular Service</h3>
+            <p>
+                {% for service in service_types %}
+                    {% if service.id == high %}
+                        {{service.service_name}}
+                    {% endif %}
+                {% endfor %}
+            </p>
+        </div>
+    </div>
+    
+    <h2>Service Booking History</h2>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Service Name</th>
+                <th>Date Requested</th>
+                <th>Status</th>
+                <th>Rating</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for booking in service_bookings %}
+            <tr>
+                <td>{{booking.id}}</td>
+                <td>
+                    {% for service in service_types %}
+                        {% if service.id == booking.service_type_id %}
+                            {{service.service_name}}
+                        {% endif %}
+                    {% endfor %}
+                </td>
+                <td>{{booking.booking_date}}</td>
+                <td>{{booking.booking_status}}</td>
+                <td>
+                    {% if booking.satisfaction_score %}
+                        {{booking.satisfaction_score}}/5
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <div class="footer">
+        <p>Thank you for using HomeHaven2.0 for your household service needs.</p>
+        <p>© 2025 HomeHaven2.0. All rights reserved.</p>
+    </div>
+</body>
+</html>
