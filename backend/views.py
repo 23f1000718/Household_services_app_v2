@@ -4,8 +4,10 @@ from werkzeug.security import check_password_hash
 from flask_restful import marshal, fields
 import flask_excel as excel
 from celery.result import AsyncResult
+import uuid
+from werkzeug.security import generate_password_hash, check_password_hash
 
-from .models import AppUser, ServiceProvider, ServiceType, Client, ServiceBooking, db
+from .models import AppRole, AppUser, ServiceProvider, ServiceType, Client, ServiceBooking, db
 from .security import datastore
 from .tasks import create_service_booking_csv
 
@@ -141,28 +143,42 @@ def register_customer():
     if datastore.find_user(email=data.get('email')):
         return jsonify({"message": "User already exists"}), 400
     
-    # Create user
-    user = datastore.create_user(
-        email=data.get('email'),
-        password=data.get('password')
-    )
-    
-    # Assign client role
-    client_role = datastore.find_role('client')
-    datastore.add_role_to_user(user, client_role)
-    
-    # Create client profile
-    client = Client(
-        name=data.get('full_name'),
-        home_address=data.get('address'),
-        postal_code=data.get('pincode'),
-        phone_number=data.get('phone_number', ''),  # Added with default empty string
-        user_id=user.id
-    )
-    
-    db.session.add(client)
-    db.session.commit()
-    
-    return jsonify({"message": "Customer registered successfully"})
-
+    try:
+        # Create the user directly with SQLAlchemy instead of using datastore
+        user = AppUser(
+                email=data.get('email'),
+                password=generate_password_hash(data.get('password')),  # Add password hashing here
+                is_active=True,
+                fs_uniquifier=str(uuid.uuid4())
+            )   
+        
+        # Get client role
+        client_role = AppRole.query.filter_by(role_name='client').first()
+        if not client_role:
+            client_role = AppRole(role_name='client', role_description='Client role')
+            db.session.add(client_role)
+            db.session.flush()
+        
+        # Associate role with user
+        user.roles = [client_role]
+        db.session.add(user)
+        db.session.flush()  # This gets the user ID without committing
+        
+        # Create client profile
+        client = Client(
+            name=data.get('full_name'),
+            home_address=data.get('address'),
+            postal_code=data.get('pincode'),
+            phone_number=data.get('phone_number', ''),
+            user_id=user.id
+        )
+        
+        db.session.add(client)
+        db.session.commit()
+        
+        return jsonify({"message": "Customer registered successfully"})
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error during registration: {str(e)}")
+        return jsonify({"message": f"Registration failed: {str(e)}"}), 500
 

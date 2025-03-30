@@ -1,10 +1,12 @@
+from flask import request
 from flask_restful import Resource, Api, reqparse, marshal, fields
 from flask_security import auth_required, roles_required, current_user
-from .models import ServiceType, Client, AppUser, ServiceProvider, ServiceBooking, db
+from .models import ServiceType, Client, AppUser, AppRole, ServiceProvider, ServiceBooking, db
 from werkzeug.security import generate_password_hash
 from backend.security import datastore
 from datetime import datetime
 from .instances import cache
+import uuid
 
 api = Api(prefix='/api')
 
@@ -206,7 +208,7 @@ class CloseServiceBooking(Resource):
         booking.booking_status = 'closed'
         db.session.commit()
         return {"message": "Service Booking Closed"}
-
+    
 api.add_resource(Services, '/services')
 api.add_resource(Clients, '/clients')
 api.add_resource(Providers, '/providers')

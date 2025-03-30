@@ -1,4 +1,4 @@
-export default{
+export default {
     template: `
     <div class="d-flex justify-content-center" style="margin-top: 25vh">
         <div class="mb-3 p-5 bg-light" style="width: 35rem;">    
@@ -65,7 +65,7 @@ export default{
     methods: {
         async register() {
             try {
-                const res = await fetch('/api/customer-signup', {
+                const res = await fetch('/api/customers', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'

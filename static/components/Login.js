@@ -75,4 +75,23 @@ export default{
             }
         }
     }
-}
+}// After successful login API call
+.then(response => {
+    if (response.role === 'client') {
+      // Store user data in localStorage or context
+      localStorage.setItem('user', JSON.stringify(response));
+      localStorage.setItem('token', response.token);
+      
+      // Redirect to customer dashboard
+      navigate('/customer/dashboard'); // Using React Router
+      // or
+      window.location.href = '/customer/dashboard'; // Direct browser redirect
+    } else if (response.role === 'provider') {
+      // Redirect to provider dashboard
+      navigate('/provider/dashboard');
+    } else if (response.role === 'admin') {
+      // Redirect to admin dashboard
+      navigate('/admin/dashboard');
+    }
+  })
+  

@@ -79,7 +79,7 @@ export default{
     methods: {
         async register() {
             try {
-                const res = await fetch('/api/professionals', {
+                const res = await fetch('/api/providers', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
